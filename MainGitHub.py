@@ -1,187 +1,153 @@
-import pygame, random, os, sys
+import turtle
+import random
+import time
+import pygame
 from pygame.locals import *
 
-
 pygame.init()
-def run_main():
-    import MainGitHub
 
-volume = 1
-size = (900, 506)
-screen = pygame.display.set_mode(size)
+pygame.mixer.music.set_volume(0.2)
+musica_de_fundo = pygame.mixer.music.load('sons/Lines of Code.mp3')
 
-pygame.display.set_caption('Run to live')
+audio_colisaoalimentosaudavel = pygame.mixer.Sound('sons/smw_coin.wav')
+audio_colisaoalimentosnaosaudavel = pygame.mixer.Sound('sons/explosao.wav')
 
-font = pygame.font.SysFont('Constantia', 30)
-fonte_principal = pygame.font.SysFont("LITHOGRAPH", 100)
-
-folder = "imagens"
-
-cenarios = ("cenario1.jpg", "cenario2.png", "cenario3.jpg")
-cenario_random = random.randint(0, len(cenarios) - 1)
-cenario = pygame.image.load(os.path.join(folder, cenarios[cenario_random]))
-
-preto = [0, 0, 0]
-
-texto_principal = fonte_principal.render(("Run To Live"), True, preto)
-screen.blit(texto_principal, [255, 125])
-
-# define cor
-bg = (204, 102, 0)
-red = (255, 0, 0)
-black = (0, 0, 0)
-white = (255, 255, 255)
-grey = (169,169,169)
-
-# define variavel global 
-clicked = False
-counter = 0
-
-musica = {}
-musica["despause"] = pygame.mixer.music.load('Sons/Lines of Code.mp3')
 pygame.mixer.music.play(-1)
 
-som = {}
-som["despause"] = pygame.mixer.Sound('Sons/swoosh.wav')
+tela = turtle.Screen()
+tela.title("Run to Live")
+tela.bgcolor("black")
+tela.bgpic("cenario.gif")
+tela.setup(width=900, height=506)
+tela.tracer(0)
+tela.register_shape("personagem_left.gif")
+tela.register_shape("personagem_right.gif")
+tela.register_shape("Alimentos Naosaudavel/naosaudavel0.gif")
+tela.register_shape("Alimentos Naosaudavel/naosaudavel1.gif")
+tela.register_shape("Alimentos Naosaudavel/naosaudavel2.gif")
+tela.register_shape("Alimentos Saudave/alimento0.gif")
+tela.register_shape("Alimentos Saudave/alimento1.gif")
+tela.register_shape("Alimentos Saudave/alimento2.gif")
+tela.register_shape("Alimentos Saudave/alimento3.gif")
 
-class menu():
-    # cores para botão e texto
-    button_col = (white)
-    hover_col = (75, 225, 255)
-    click_col = (50, 150, 255)
-    text_col = black
-    width = 180
-    height = 70
+score = 0
+lives = 3
 
-    def __init__(self, x, y, text):
-        self.x = x
-        self.y = y
-        self.text = text
+player = turtle.Turtle()
+player.speed(0)
+player.shape("personagem_left.gif")
+player.color("white")
+player.penup()
+player.goto(0, -140)
+player.diection = "stop"
 
-    def draw_button(self):
+saudaveis = []
+for x in range(1,4):
+    saudavel = turtle.Turtle()
+    saudavel.shape("Alimentos Saudave/alimento"+str(x)+".gif")
+    saudavel.color("green")
+    saudavel.penup()
+    saudavel.goto(-100, 250)
+    saudavel.speed =  1 #random.randint(1, 2) 
+    saudaveis.append(saudavel)
 
-        global clicked
-        action = False
+nao_saudaveis = []
+for y in range(1,2):
+    naosaudavel = turtle.Turtle()
+    naosaudavel.shape("Alimentos Naosaudavel/naosaudavel"+str(y)+".gif")
+    naosaudavel.color("green")
+    naosaudavel.penup()
+    naosaudavel.goto(100, 250)
+    naosaudavel.speed = 1 #random.randint(1, 2)
+    nao_saudaveis.append(naosaudavel)
 
-        # obter a posição do mouse
-        pos = pygame.mouse.get_pos()
+quadro = turtle.Turtle()
+quadro.speed(0)
+quadro.shape("square")
+quadro.color("white")
+quadro.penup()
+quadro.hideturtle()
+quadro.goto(0, 200)
+quadro.write("Pontuação: 0  Vidas: 3", align="center", font=("Courier", 24, "normal"))
 
-        #criar um objeto pygame Rect para o botão
-        button_rect = Rect(self.x, self.y, self.width, self.height)
+def go_left():
+    x, y = player.position()
+    player.goto(x=x-20, y=y)
+    player.shape("personagem_right.gif")
 
-        # clicar botao
-        if button_rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1:
-                clicked = True
-                pygame.draw.rect(screen, self.click_col, button_rect)
-            elif pygame.mouse.get_pressed()[0] == 0 and clicked == True:
-                clicked = False
-                action = True
-            else:
-                pygame.draw.rect(screen, self.hover_col, button_rect)
-        else:
-            pygame.draw.rect(screen, self.button_col, button_rect)
+def go_right():
+    x, y = player.position()
+    player.goto(x=x+20, y=y)
+    player.shape("personagem_left.gif")
 
-        # contorno do botão
-        pygame.draw.line(screen, grey, (self.x, self.y), (self.x + self.width, self.y), 2)
-        pygame.draw.line(screen, grey, (self.x, self.y), (self.x, self.y + self.height), 2)
-        pygame.draw.line(screen, black, (self.x, self.y + self.height), (self.x + self.width, self.y + self.height), 2)
-        pygame.draw.line(screen, black, (self.x + self.width, self.y), (self.x + self.width, self.y + self.height), 2)
+tela.listen()
+tela.onkeypress(go_left, "Left")
+tela.onkeypress(go_right, "Right")
 
-        # adicionar texto ao botão
-        text_img = font.render(self.text, True, self.text_col)
-        text_len = text_img.get_width()
-        screen.blit(text_img, (self.x + int(self.width / 2) - int(text_len / 2), self.y + 25))
-        return action
+# Loop do jogo (Main )
+sair = True
+while sair:
+    tela.update()
+    tela.listen()
 
-def como_jogar():
-    import sys, pygame, os, random
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                go_left()
+            if event.key == pygame.K_RIGHT:
+                go_right()
 
-    pygame.init()
+    for saudavel in saudaveis:
+        # Movendo os alimentos saudável
+        saudavel.sety(saudavel.ycor() - saudavel.speed)
 
-    size = (900, 506)
-    screen = pygame.display.set_mode(size)
+        # Verificando se os alimentos não estão fora da tela
+        if saudavel.ycor() < -300:
+            saudavel.goto(random.randint(-300, 300), random.randint(400, 800))
 
-    pygame.display.set_caption("Run To Live")
+        # Verificando se ha colisões
+        if player.distance(saudavel) < 40:
+            score += 10
+            audio_colisaoalimentosaudavel.play()
+            quadro.clear()
+            quadro.write("Pontuação: {}  Vidas: {}".format(score, lives), align="center", font=("Courier", 24, "normal"))
+            # Movendo os alimentos saudável ao topo
+            saudavel.goto(random.randint(-300, 300), random.randint(400, 800))
 
-    folder = "imagens"
+    for naosaudavel in nao_saudaveis:
+        # Movendo alimentos não saudável
+        naosaudavel.sety(naosaudavel.ycor() - naosaudavel.speed)
 
-    cenarios = ("cenario1.jpg", "cenario2.png", "cenario3.jpg")
-    cenario_random = random.randint(0, len(cenarios) - 1)
-    cenario = pygame.image.load(os.path.join(folder, cenarios[cenario_random]))
+        if naosaudavel.ycor() < -300:
+            naosaudavel.goto(random.randint(-300, 300), random.randint(400, 800))
 
-    branco = [0, 0, 0]
+        if player.distance(naosaudavel) < 40:
+            # Pontuação aumenta
+            score -= 10
+            lives -= 1
 
-    fonte_texto = pygame.font.SysFont("LITHOGRAPH", 30)
-    titulo = pygame.font.SysFont("LITHOGRAPH", 50)
+            audio_colisaoalimentosnaosaudavel.play()
 
-    msg_titulo = titulo.render(("Como jogar:"), True, branco)
-    texto = fonte_texto.render(("Utilizando as setas do teclado para controlar seu personagem, guie ele"), True, branco)
-    texto2 = fonte_texto.render(("para capturar as comidas saudáveis e sobreviver o maximo de tempo que conseguir."), True, branco)
+            # Mostrando a pontuação
+            quadro.clear()
+            quadro.write("Pontuação: {}  Vidas: {}".format(score, lives), align="center", font=("Courier", 24, "normal"))
 
-    msg_dificuldade1 = fonte_texto.render(("A dificuldade irá aumentar a cada 15 segundos."), True, branco)
+            time.sleep(1)
+            # Movendo os alimentos não saudável ao topo
+            for naosaudavel in nao_saudaveis:
+                naosaudavel.goto(random.randint(-300, 300), random.randint(400, 800))
 
-    while True:
-
-        screen.blit(cenario, (0, 0))
-
-        if jogar.draw_button():
-            run_main()
-            pygame.display.update()
-        if voltar.draw_button():
-            menu(240, 240, 'Jogar')
-            menu(470, 240, 'Instruções')
-            menu(470, 240, 'Voltar')
-            menu(240, 340, 'Tirar som')
-            menu(470, 340, 'Colocar som')
-            pygame.display.update()
-            break
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x = pygame.mouse.get_pos()[0]
-                y = pygame.mouse.get_pos()[1]
-                if (x > 190 and x < 270) and (y > 380 and y < 500):
-                    if (volume == 1):
-                        som["despause"].play()
-                    menu()
-
-
-        screen.blit(msg_titulo, [3, 3])
-        screen.blit(texto, [3, 70])
-        screen.blit(texto2, [3, 90])
-        screen.blit(msg_dificuldade1, [3, 130])
-
-        pygame.display.flip()
-
-jogar = menu(240, 240, 'Jogar')
-instrucao = menu(470, 240, 'Instruções')
-voltar = menu(470, 240, 'Voltar')
-tirar_som = menu(240, 340, 'Tirar som')
-colocar_som = menu(470, 340, 'Colocar som')
-
-while True:
-
-    screen.blit(cenario, (0, 0))
-    screen.blit(texto_principal, [255, 125])
-
-    if jogar.draw_button():
-        run_main()
-    if instrucao.draw_button():
-        como_jogar()
-    if tirar_som.draw_button():
-        if(volume == 1):
-            pygame.mixer.music.pause()
-    if colocar_som.draw_button():
-        pygame.mixer.music.unpause()
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-    pygame.display.update()
+    # Verificando se o jogo acabou
+    if lives == 0:
+        quadro.clear()
+        quadro.write("Game Over! Pontuação: {}".format(score), align="center", font=("Courier", 35, "normal"))
+        quadro.clear()
+        time.sleep(5)
+        quadro.write("\nAguarde uns instantes para jogar novamente ou feche o programa para sair! ".format(), align="center", font=("Courier", 15, "normal"))
+        time.sleep(5)
+        tela.update()
+        score = 0
+        lives = 3
+        quadro.clear()
+        quadro.write("Pontuação: {}  Vidas: {}".format(score, lives), align="center", font=("Courier", 24, "normal"))
