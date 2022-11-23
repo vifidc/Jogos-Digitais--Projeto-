@@ -1,2 +1,2 @@
 #Objetivo:
-#Integrandes:
+#Integrantes:
