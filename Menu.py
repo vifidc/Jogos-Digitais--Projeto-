@@ -1,10 +1,9 @@
 import pygame, random, os, sys
 from pygame.locals import *
 
-
 pygame.init()
 def run_main():
-    import MainGitHub
+    import main
 
 volume = 1
 size = (900, 506)
@@ -31,7 +30,6 @@ bg = (204, 102, 0)
 red = (255, 0, 0)
 black = (0, 0, 0)
 white = (255, 255, 255)
-grey = (169,169,169)
 
 # define variavel global 
 clicked = False
@@ -69,7 +67,7 @@ class menu():
         #criar um objeto pygame Rect para o botão
         button_rect = Rect(self.x, self.y, self.width, self.height)
 
-        # clicar botao
+        # verifique as condições do mouseover e clicado
         if button_rect.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1:
                 clicked = True
@@ -82,9 +80,9 @@ class menu():
         else:
             pygame.draw.rect(screen, self.button_col, button_rect)
 
-        # contorno do botão
-        pygame.draw.line(screen, grey, (self.x, self.y), (self.x + self.width, self.y), 2)
-        pygame.draw.line(screen, grey, (self.x, self.y), (self.x, self.y + self.height), 2)
+        # adicionar sombreado ao botão
+        pygame.draw.line(screen, white, (self.x, self.y), (self.x + self.width, self.y), 2)
+        pygame.draw.line(screen, white, (self.x, self.y), (self.x, self.y + self.height), 2)
         pygame.draw.line(screen, black, (self.x, self.y + self.height), (self.x + self.width, self.y + self.height), 2)
         pygame.draw.line(screen, black, (self.x + self.width, self.y), (self.x + self.width, self.y + self.height), 2)
 
@@ -116,7 +114,7 @@ def como_jogar():
     titulo = pygame.font.SysFont("LITHOGRAPH", 50)
 
     msg_titulo = titulo.render(("Como jogar:"), True, branco)
-    texto = fonte_texto.render(("Utilizando as setas do teclado para controlar seu personagem, guie ele"), True, branco)
+    texto = fonte_texto.render(("Utilizando as setas do teclado para controlar seu personagem guie ele"), True, branco)
     texto2 = fonte_texto.render(("para capturar as comidas saudáveis e sobreviver o maximo de tempo que conseguir."), True, branco)
 
     msg_dificuldade1 = fonte_texto.render(("A dificuldade irá aumentar a cada 15 segundos."), True, branco)
@@ -150,7 +148,6 @@ def como_jogar():
                         som["despause"].play()
                     menu()
 
-
         screen.blit(msg_titulo, [3, 3])
         screen.blit(texto, [3, 70])
         screen.blit(texto2, [3, 90])
@@ -158,11 +155,13 @@ def como_jogar():
 
         pygame.display.flip()
 
+
 jogar = menu(240, 240, 'Jogar')
 instrucao = menu(470, 240, 'Instruções')
 voltar = menu(470, 240, 'Voltar')
 tirar_som = menu(240, 340, 'Tirar som')
 colocar_som = menu(470, 340, 'Colocar som')
+
 
 while True:
 
@@ -178,6 +177,9 @@ while True:
             pygame.mixer.music.pause()
     if colocar_som.draw_button():
         pygame.mixer.music.unpause()
+
+    #counter_img = font.render(str(counter), True, red)
+    #screen.blit(counter_img, (280, 450))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
